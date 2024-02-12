@@ -1,14 +1,14 @@
 # Counter Implementation
 
-The goal of this program is to explore various approaches to incrementing a counter in a PostgreSQL database concurrently, while considering factors such as performance, concurrency control, and consistency.
+The goal of this program is to explore various approaches to incrementing a counter in a PostgreSQL database concurrently while considering factors such as performance, concurrency control, and consistency.
 
-Initially we have table `user_counter` with fields `user_id`, `counter`, and `version`, as shown below.
+Initially, we have table `user_counter` with fields `user_id`, `counter`, and `version`, as shown below.
 
 | user_id | counter | version | 
 |---------|---------|---------|
 |    1    |    0    |    0    |
 
-Then the program creates 10 threads and increments the counter 10_000 times in each thread using one of 4 different strategies. Let's take a look at results!
+Then the program creates 10 threads and increments the counter 10_000 times in each thread using one of 4 different strategies. Let's take a look at the results!
 
 ### Lost Update
 Increments the counter without any concurrency control, potentially leading to lost updates if multiple threads attempt to update the counter simultaneously.
@@ -19,7 +19,7 @@ Increments the counter without any concurrency control, potentially leading to l
 |    1    | 10_885  |    0    |
 
 ### In Place Update
-This implementation uses a basic synchronized block to ensure only one thread can update the counter at a time, preventing lost updates but potentially introducing contention and reducing concurrency.
+Uses a basic synchronized block to ensure only one thread can update the counter at a time, preventing lost updates but potentially introducing contention and reducing concurrency.
 **Time: 30 seconds.**
 
 | user_id | counter | version |
@@ -27,15 +27,15 @@ This implementation uses a basic synchronized block to ensure only one thread ca
 |    1    | 100_000 |    0    |
 
 ### Row Level Locking
-This implementation utilizes row-level locking to prevent concurrent updates to the same counter. Each thread acquires a lock on the row it intends to update, ensuring only one thread can modify the counter at a time.
+Utilizes row-level locking to prevent concurrent updates to the same counter. Each thread acquires a lock on the row it intends to update, ensuring only one thread can modify the counter at a time.
 **Time: 41 seconds.**
 
 | user_id | counter | version |
 |---------|---------|---------|
 |    1    | 100_000 |    0    |
 
-### OptimisticConcurrencyControlIncrementer
-This implementation employs optimistic concurrency control using a version number. Threads first read the current version of the counter, perform the update, and check if the version has changed before committing the update. If the version has changed, the thread retries the update.
+### Optimistic Concurrency Control
+Employs optimistic concurrency control using a version number. Threads first read the current version of the counter, perform the update, and check if the version has changed before committing the update. If the version has changed, the thread retries the update.
 **Time: 135 seconds.**
 
 | user_id | counter | version |
